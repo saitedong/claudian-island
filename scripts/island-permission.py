@@ -23,6 +23,18 @@ def main():
     tool_name = hook_input.get("tool_name", hook_input.get("tool", "unknown"))
     request_id = str(uuid.uuid4())
 
+    # AskUserQuestion: 岛屿只做指示，不阻塞授权。立即放行，让 Claude Code 自己弹选项 UI。
+    if tool_name == "AskUserQuestion":
+        try:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.connect(SOCKET_PATH)
+            sock.sendall((json.dumps({"type": "question_pending", "id": request_id}) + "\n").encode("utf-8"))
+            sock.close()
+        except Exception:
+            pass
+        print(json.dumps({"decision": "allow"}))
+        return
+
     payload = json.dumps({
         "type": "permission_request",
         "tool": tool_name,

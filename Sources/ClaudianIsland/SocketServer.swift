@@ -82,6 +82,19 @@ final class SocketServer {
             DispatchQueue.main.async { self.viewModel.transitionTo(.notification(message: msg)) }
             close(fd)
 
+        case "question_pending":
+            let id = json["id"] as? String ?? UUID().uuidString
+            DispatchQueue.main.async { self.viewModel.transitionTo(.question(id: id)) }
+            close(fd)
+
+        case "dismiss_question":
+            DispatchQueue.main.async {
+                if case .question = self.viewModel.state {
+                    self.viewModel.transitionTo(.idle)
+                }
+            }
+            close(fd)
+
         case "permission_request":
             let tool = json["tool"] as? String ?? "unknown"
             let id   = json["id"]   as? String ?? UUID().uuidString

@@ -29,6 +29,13 @@ struct IslandView: View {
                         .padding(.horizontal, 4)
                         .transition(.scale(scale: 0.6).combined(with: .opacity))
 
+                case .question:
+                    AskUserQuestionView(viewModel: viewModel)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(pillBg(Color(red: 0.18, green: 0.32, blue: 0.68)))
+                        .padding(.horizontal, 4)
+                        .transition(.scale(scale: 0.6).combined(with: .opacity))
+
                 case .notification(let message):
                     NotificationView(message: message)
                         .onTapGesture { viewModel.focusObsidian() }

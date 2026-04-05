@@ -19,12 +19,15 @@ echo "  ✓ ~/Applications/ClaudianIsland.app"
 # 2. 安装 hook 脚本
 echo "▶ 安装 hook 脚本 ..."
 mkdir -p ~/.claude/scripts
-cp "$SCRIPT_DIR/scripts/island-notify.sh"     ~/.claude/scripts/
-cp "$SCRIPT_DIR/scripts/island-permission.py" ~/.claude/scripts/
+cp "$SCRIPT_DIR/scripts/island-notify.sh"             ~/.claude/scripts/
+cp "$SCRIPT_DIR/scripts/island-permission.py"         ~/.claude/scripts/
+cp "$SCRIPT_DIR/scripts/island-question-dismiss.sh"   ~/.claude/scripts/
 chmod +x ~/.claude/scripts/island-notify.sh
 chmod +x ~/.claude/scripts/island-permission.py
+chmod +x ~/.claude/scripts/island-question-dismiss.sh
 echo "  ✓ ~/.claude/scripts/island-notify.sh"
 echo "  ✓ ~/.claude/scripts/island-permission.py"
+echo "  ✓ ~/.claude/scripts/island-question-dismiss.sh"
 
 # 3. 安装 LaunchAgent（开机自启）
 echo "▶ 配置开机自启 ..."
