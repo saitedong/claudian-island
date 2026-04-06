@@ -15,44 +15,37 @@ struct IslandView: View {
                     Color.clear
 
                 case .complete:
-                    CompleteView()
-                        .onTapGesture { viewModel.focusObsidian() }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(pillBg(Color(red: 0.08, green: 0.55, blue: 0.18)))
-                        .padding(.horizontal, 4)
-                        .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    pill(CompleteView(), color: Color(red: 0.08, green: 0.55, blue: 0.18))
 
                 case .permission(let tool, _):
-                    PermissionView(tool: tool, viewModel: viewModel)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(pillBg(Color(white: 0.12)))
-                        .padding(.horizontal, 4)
-                        .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    pill(PermissionView(tool: tool), color: Color(white: 0.12))
 
                 case .question:
-                    AskUserQuestionView(viewModel: viewModel)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(pillBg(Color(red: 0.18, green: 0.32, blue: 0.68)))
-                        .padding(.horizontal, 4)
-                        .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    pill(AskUserQuestionView(), color: Color(red: 0.18, green: 0.32, blue: 0.68))
 
                 case .notification(let message):
-                    NotificationView(message: message)
-                        .onTapGesture { viewModel.focusObsidian() }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(pillBg(Color(red: 0.65, green: 0.38, blue: 0.05)))
-                        .padding(.horizontal, 4)
-                        .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    pill(NotificationView(message: message), color: Color(red: 0.65, green: 0.38, blue: 0.05))
                 }
             }
             .animation(.spring(response: 0.35, dampingFraction: 0.75), value: viewModel.state)
         }
     }
 
+    /// 统一的 pill 容器：点击任何状态 → 跳 Obsidian + 立即消失
     @ViewBuilder
-    private func pillBg(_ color: Color) -> some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(color)
-            .shadow(color: .black.opacity(0.4), radius: shadowRadius, y: 3)
+    private func pill<V: View>(_ content: V, color: Color) -> some View {
+        content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(color)
+                    .shadow(color: .black.opacity(0.4), radius: shadowRadius, y: 3)
+            )
+            .padding(.horizontal, 4)
+            .transition(.scale(scale: 0.6).combined(with: .opacity))
+            .onTapGesture {
+                viewModel.focusObsidian()
+                Task { @MainActor in viewModel.transitionTo(.idle) }
+            }
     }
 }

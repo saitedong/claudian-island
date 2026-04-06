@@ -1,34 +1,19 @@
 import SwiftUI
 
 struct AskUserQuestionView: View {
-    let viewModel: IslandViewModel
-
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 6) {
             Image(systemName: "questionmark.bubble.fill")
                 .foregroundStyle(.white)
-                .font(.system(size: 14))
-
-            Text("Obsidian 有提问")
+                .font(.system(size: 14, weight: .semibold))
+            Text("有提问待回答")
                 .foregroundStyle(.white)
-                .font(.system(size: 12, weight: .medium))
-                .lineLimit(1)
-
+                .font(.system(size: 13, weight: .medium))
             Spacer()
-
-            Button {
-                viewModel.focusObsidian()
-                Task { @MainActor in viewModel.transitionTo(.idle) }
-            } label: {
-                Text("去 Obsidian")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill(Color.white))
-            }
-            .buttonStyle(.plain)
+            Image(systemName: "arrow.up.right")
+                .foregroundStyle(.white.opacity(0.7))
+                .font(.system(size: 11))
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 14)
     }
 }

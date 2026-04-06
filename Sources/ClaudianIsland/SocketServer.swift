@@ -64,17 +64,27 @@ final class SocketServer {
         guard n > 0 else { close(fd); return }
 
         let data = Data(bytes: buffer, count: n)
+        let rawString = String(data: data, encoding: .utf8) ?? "<binary>"
+        let ts = ISO8601DateFormatter().string(from: Date())
+        print("[Island \(ts)] recv: \(rawString.trimmingCharacters(in: .whitespacesAndNewlines))")
+
         guard
             let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
             let type_ = json["type"] as? String
         else {
+            print("[Island] invalid JSON, closing")
             close(fd)
             return
         }
 
         switch type_ {
         case "stop":
-            DispatchQueue.main.async { self.viewModel.transitionTo(.complete) }
+            DispatchQueue.main.async { self.viewModel.scheduleStop() }
+            close(fd)
+
+        case "tool_activity":
+            // Claude 正在调用工具 → 取消待弹的 ✓（还在干活）
+            DispatchQueue.main.async { self.viewModel.cancelPendingStop() }
             close(fd)
 
         case "notification":
@@ -95,21 +105,14 @@ final class SocketServer {
             }
             close(fd)
 
-        case "permission_request":
+        case "permission_pending":
             let tool = json["tool"] as? String ?? "unknown"
-            let id   = json["id"]   as? String ?? UUID().uuidString
-
-            // Keep fd open — reply when user taps allow/deny
+            // 只做通知，不阻塞。用户点击后跳 Obsidian 处理审批。
+            // tool_activity 或 stop 会自动清除这个状态。
             DispatchQueue.main.async {
-                self.viewModel.permissionReply = { decision in
-                    let response = "{\"id\":\"\(id)\",\"decision\":\"\(decision)\"}\n"
-                    let bytes = Array(response.utf8)
-                    write(fd, bytes, bytes.count)
-                    close(fd)
-                    self.viewModel.permissionReply = nil
-                }
-                self.viewModel.transitionTo(.permission(tool: tool, id: id))
+                self.viewModel.transitionTo(.permission(tool: tool, id: ""))
             }
+            close(fd)
 
         default:
             close(fd)
